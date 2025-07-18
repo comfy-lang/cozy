@@ -1,3 +1,5 @@
+<img width="993" height="219" alt="cozy_logo" src="https://github.com/user-attachments/assets/df00e491-d936-4090-b1e1-0273be7cc295" />
+
 # cozy
 
 **cozy** is the official CLI tool for the [comfy language](https://github.com/comfy-lang/comfy).
