@@ -21,11 +21,11 @@ pub fn main() !void {
     if (std.mem.eql(u8, command, "new")) {
         const project_name = if (args.len >= 3) args[2] else "my-comfy-project";
         try createProject(project_name, stdout);
-    } 
+    }
 
     if (std.mem.eql(u8, command, "build")) {
         try buildProject(stdout);
-    } 
+    }
 
     if (std.mem.eql(u8, command, "run")) {
         const file = if (args.len >= 3) args[2] else "src/main.fy";
@@ -54,9 +54,25 @@ fn printHelp(writer: anytype) !void {
     , .{});
 }
 
-fn createProject(name: []const u8, writer: anytype) !void {
-    // TODO: generate project.comfy, src/main.fy, etc.
+fn createProject(name: []const u8, writer: anytype, allocator: std.mem.Allocator) !void {
     try writer.print("Creating project: {s}\n", .{name});
+    try std.fs.cwd().makeDir(name);
+    const source_dir = try std.fmt.allocPrint(allocator, "{s}/src", .{name});
+    defer allocator.free(source_dir);
+    try std.fs.cwd().makeDir(source_dir);
+
+    const project_file = try std.fmt.allocPrint(allocator, "{s}/project.comfx", .{name});
+    defer allocator.free(project_file);
+    const file = try std.fs.cwd().createFile(project_file, .{});
+    defer file.close();
+    try file.writeAll("[meta]\nversion: \"0.1.0\"\ndescription: \"A cozy project\"\n");
+
+    const main_file = try std.fmt.allocPrint(allocator, "{s}/src/main.fy", .{name});
+    defer allocator.free(main_file);
+
+    const mainFile = try std.fs.cwd().createFile(main_file, .{});
+    defer mainFile.close();
+    try mainFile.writeAll("fn main() {\n $write(1, \"Hello Comfy! :3\");\n$exit(0);\n}\n");
 }
 
 fn buildProject(writer: anytype) !void {
@@ -130,4 +146,3 @@ fn downloadComfyCompilerBinary(client: *http.Client, allocator: std.mem.Allocato
 
     return body;
 }
-
